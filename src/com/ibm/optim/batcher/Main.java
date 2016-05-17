@@ -15,7 +15,7 @@ public class Main {
     
     private static final HashMap<String, Action> ACTIONS = new HashMap<>();
     static {
-        ACTIONS.put("EXTRACT", new DoExtract());
+        ACTIONS.put(ActionExtract.NAME, new ActionExtract());
     }
 
     /**
@@ -46,7 +46,9 @@ public class Main {
         try {
             action.run(new OptimCalls(props, args));
         } catch(Exception ex) {
-            
+            System.err.println("ERROR: failed to execute action " + action.getName());
+            ex.printStackTrace(System.err);
+            System.exit(1);
         }
     }
     
@@ -58,15 +60,24 @@ public class Main {
     }
     
     private static interface Action {
+        String getName();
         void run(OptimCalls oc) throws Exception;
     }
     
-    private static class DoExtract implements Action {
+    private static class ActionExtract implements Action {
+        
+        public static final String NAME = "EXTRACT";
+
+        @Override
+        public String getName() {
+            return NAME;
+        }
 
         @Override
         public void run(OptimCalls oc) throws Exception {
             if (oc.getCallArgs().length != 2)
                 showHelpAndExit();
+            new DoExtract(oc).run();
         }
 
     }
