@@ -44,7 +44,7 @@ public class Main {
             throw new UnsupportedOperationException(); // UNREACHED
         }
         try {
-            action.run(args, props);
+            action.run(new OptimCalls(props, args));
         } catch(Exception ex) {
             
         }
@@ -52,22 +52,23 @@ public class Main {
     
     private static void showHelpAndExit() {
         System.err.println("USAGE: java -jar OptimBatcher.jar OptimBatcher.properties ACTION ...\n"
-                + "\nValid actions and options:\n"
+                + "Valid actions and options:\n"
                 + "    EXTRACT data-source tables.txt\n");
         System.exit(1);
     }
     
     private static interface Action {
-        void run(String[] args, Properties props) throws Exception;
+        void run(OptimCalls oc) throws Exception;
     }
     
     private static class DoExtract implements Action {
 
         @Override
-        public void run(String[] args, Properties props) throws Exception {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        public void run(OptimCalls oc) throws Exception {
+            if (oc.getCallArgs().length != 2)
+                showHelpAndExit();
         }
-        
+
     }
     
 }
