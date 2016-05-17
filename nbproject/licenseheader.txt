@@ -1,0 +1,7 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}IBM proprietary
+<#if licenseLast??>
+${licenseLast}
+</#if>
