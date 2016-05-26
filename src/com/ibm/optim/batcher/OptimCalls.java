@@ -19,15 +19,11 @@ public class OptimCalls implements Closeable {
     private final Properties properties;
     private final String optimPath;
     
-    private final String[] callArgs;
-    
     private Connection optimDirCnc;
     
-    public OptimCalls(Properties props, String[] args) {
+    public OptimCalls(Properties props) {
         this.properties = props;
         this.optimPath = props.getProperty("optim.path");
-        this.callArgs = new String[args.length-2];
-        System.arraycopy(args, 2, this.callArgs, 0, this.callArgs.length);
     }
 
     public Properties getProperties() {
@@ -35,9 +31,6 @@ public class OptimCalls implements Closeable {
     }
     public String getOptimPath() {
         return optimPath;
-    }
-    public String[] getCallArgs() {
-        return callArgs;
     }
 
     public void open() throws Exception {

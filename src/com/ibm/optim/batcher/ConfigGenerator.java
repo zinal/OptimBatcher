@@ -15,14 +15,14 @@ import java.util.List;
  *
  * @author zinal_m
  */
-public class DoExtract {
+public class ConfigGenerator {
 
     private final OptimCalls oc;
 
     private String dataSourceName;
     private List<String> tableList;
 
-    public DoExtract(OptimCalls oc) {
+    public ConfigGenerator(OptimCalls oc) {
         this.oc = oc;
     }
 

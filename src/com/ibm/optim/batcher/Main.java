@@ -4,7 +4,6 @@
 package com.ibm.optim.batcher;
 
 import java.io.FileInputStream;
-import java.util.HashMap;
 import java.util.Properties;
 
 /**
@@ -12,17 +11,12 @@ import java.util.Properties;
  * @author zinal_m
  */
 public class Main {
-    
-    private static final HashMap<String, Action> ACTIONS = new HashMap<>();
-    static {
-        ACTIONS.put(ActionExtract.NAME, new ActionExtract());
-    }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        if (args.length < 2) {
+        if (args.length != 3) {
             showHelpAndExit();
         }
         final Properties props = new Properties();
@@ -38,16 +32,14 @@ public class Main {
             ex.printStackTrace(System.err);
             System.exit(1);
         }
-        final Action action = ACTIONS.get(args[1].trim().toUpperCase());
-        if (action==null) {
-            showHelpAndExit();
-            throw new UnsupportedOperationException(); // UNREACHED
-        }
-        final OptimCalls oc = new OptimCalls(props, args);
+        final OptimCalls oc = new OptimCalls(props);
         try {
-            action.run(oc);
+            final ConfigGenerator call = new ConfigGenerator(oc);
+            call.setDataSourceName(args[1]);
+            call.setTableList(ConfigGenerator.loadTablesFromFile(args[2]));
+            call.run();
         } catch(Exception ex) {
-            System.err.println("ERROR: failed to execute action " + action.getName());
+            System.err.println("ERROR: utility execution failed");
             ex.printStackTrace(System.err);
             System.exit(1);
         } finally {
@@ -56,36 +48,8 @@ public class Main {
     }
     
     private static void showHelpAndExit() {
-        System.err.println("USAGE: java -jar OptimBatcher.jar OptimBatcher.properties ACTION ...\n"
-                + "Valid actions and options:\n"
-                + "    EXTRACT data-source tables.txt\n");
+        System.err.println("USAGE: java -jar OptimBatcher.jar "
+                + "OptimBatcher.properties data-source tables.txt");
         System.exit(1);
     }
-    
-    private static interface Action {
-        String getName();
-        void run(OptimCalls oc) throws Exception;
-    }
-
-    private static class ActionExtract implements Action {
-        
-        public static final String NAME = "EXTRACT";
-
-        @Override
-        public String getName() {
-            return NAME;
-        }
-
-        @Override
-        public void run(OptimCalls oc) throws Exception {
-            if (oc.getCallArgs().length != 2)
-                showHelpAndExit();
-            final DoExtract call = new DoExtract(oc);
-            call.setDataSourceName(oc.getCallArgs()[0]);
-            call.setTableList(DoExtract.loadTablesFromFile(oc.getCallArgs()[1]));
-            call.run();
-        }
-
-    }
-    
 }
