@@ -3,23 +3,37 @@
  */
 package com.ibm.optim.batcher;
 
+import java.util.List;
+
 /**
  *
  * @author zinal_m
  */
-final class DoExtract {
+public class DoExtract {
 
     private final OptimCalls oc;
-    
-    private final String dataSourceName;
-    private final String tableListFileName;
+
+    private String dataSourceName;
+    private List<String> tableList;
 
     public DoExtract(OptimCalls oc) {
         this.oc = oc;
-        this.dataSourceName = oc.getCallArgs()[0];
-        this.tableListFileName = oc.getCallArgs()[1];
     }
-    
+
+    public String getDataSourceName() {
+        return dataSourceName;
+    }
+    public void setDataSourceName(String dataSourceName) {
+        this.dataSourceName = dataSourceName;
+    }
+
+    public List<String> getTableList() {
+        return tableList;
+    }
+    public void setTableList(List<String> tableList) {
+        this.tableList = tableList;
+    }
+
     public void run() throws Exception {
         
     }

@@ -63,7 +63,7 @@ public class Main {
         String getName();
         void run(OptimCalls oc) throws Exception;
     }
-    
+
     private static class ActionExtract implements Action {
         
         public static final String NAME = "EXTRACT";
