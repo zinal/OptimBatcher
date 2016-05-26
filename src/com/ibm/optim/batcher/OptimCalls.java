@@ -6,6 +6,8 @@ package com.ibm.optim.batcher;
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Properties;
 
 /**
@@ -71,6 +73,46 @@ public class OptimCalls implements Closeable {
             optimDirCnc.close();
         } catch(Exception ex) {}
         optimDirCnc = null;
+    }
+    
+    public boolean idExists(String id, String type) throws Exception {
+        final String[] items = id.split("[.]");
+        if (items.length!=2)
+            throw new IllegalArgumentException("Invalid ID format: [" + id + "]");
+        final PreparedStatement ps = optimDirCnc.prepareStatement(""
+                + "SELECT COUNT(1) FROM PSTOBJ2 WHERE OBJ_ID=? AND OBJ_NAME=? AND OBJ_TYPE=?");
+        try {
+            ps.setString(1, items[0].toUpperCase());
+            ps.setString(2, items[1].toUpperCase());
+            ps.setString(3, type);
+            final ResultSet rs = ps.executeQuery();
+            try {
+                return ( rs.next() && rs.getInt(1)>0 );
+            } finally {
+                rs.close();
+            }
+        } finally {
+            ps.close();
+        }
+    }
+    
+    public String createId(String dataSource, String baseName, String type) throws Exception {
+        if (dataSource.length() > 8)
+            dataSource = dataSource.substring(0, 8);
+        if (baseName.length() > 12)
+            baseName = baseName.substring(0, 12);
+        String id = dataSource + "." + baseName;
+        if (!idExists(id, type))
+            return id;
+        if (baseName.length() > 9)
+            baseName = baseName.substring(0, 9);
+        for (int i=0; i<999; ++i) {
+            id = dataSource + "." + baseName + String.format("%03d", i);
+            if (!idExists(id, type))
+                return id;
+        }
+        throw new IllegalArgumentException("Cannot create unique ID for DS=[" + dataSource
+            + "], BN=[" + baseName + "], T=" + type);
     }
 
 }
