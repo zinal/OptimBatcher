@@ -103,9 +103,18 @@ public class ConfigGenerator {
 
     private void importFile(File f) throws Exception {
         final List<String> cmd = new ArrayList<>();
+        final String runas = oc.getProperties().getProperty("optim.runas");
+        if (runas!=null && runas.trim().length()>0) {
+            for (String item : runas.split(" ")) {
+                final String cur = item.trim();
+                if (cur.length() > 0)
+                    cmd.add(cur);
+            }
+        }
         cmd.add(new File(oc.getOptimPath(), "PR0CMND.EXE").getAbsolutePath());
         cmd.add("/IMPORT");
-        cmd.add("IN=" + f.getAbsolutePath());
+        final String path = f.getAbsolutePath();
+        cmd.add("IN=" + path);
         final ProcessBuilder pb = new ProcessBuilder(cmd);
         final Process proc = pb.start();
         int code = proc.waitFor();
