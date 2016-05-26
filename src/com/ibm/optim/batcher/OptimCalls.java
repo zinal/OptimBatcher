@@ -75,7 +75,7 @@ public class OptimCalls implements Closeable {
         optimDirCnc = null;
     }
     
-    public boolean idExists(String id, String type) throws Exception {
+    public boolean idExists(String id, ObjectTypes type) throws Exception {
         final String[] items = id.split("[.]");
         if (items.length!=2)
             throw new IllegalArgumentException("Invalid ID format: [" + id + "]");
@@ -84,7 +84,7 @@ public class OptimCalls implements Closeable {
         try {
             ps.setString(1, items[0].toUpperCase());
             ps.setString(2, items[1].toUpperCase());
-            ps.setString(3, type);
+            ps.setString(3, type.getCode());
             final ResultSet rs = ps.executeQuery();
             try {
                 return ( rs.next() && rs.getInt(1)>0 );
@@ -96,7 +96,7 @@ public class OptimCalls implements Closeable {
         }
     }
     
-    public String createId(String dataSource, String baseName, String type) throws Exception {
+    public String createId(String dataSource, String baseName, ObjectTypes type) throws Exception {
         if (dataSource.length() > 8)
             dataSource = dataSource.substring(0, 8);
         if (baseName.length() > 12)

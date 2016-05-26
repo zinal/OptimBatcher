@@ -80,7 +80,10 @@ public class Main {
         public void run(OptimCalls oc) throws Exception {
             if (oc.getCallArgs().length != 2)
                 showHelpAndExit();
-            new DoExtract(oc).run();
+            final DoExtract call = new DoExtract(oc);
+            call.setDataSourceName(oc.getCallArgs()[0]);
+            call.setTableList(DoExtract.loadTablesFromFile(oc.getCallArgs()[1]));
+            call.run();
         }
 
     }
