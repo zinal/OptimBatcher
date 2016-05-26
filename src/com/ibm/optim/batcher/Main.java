@@ -34,6 +34,7 @@ public class Main {
         }
         final OptimCalls oc = new OptimCalls(props);
         try {
+            oc.open();
             final ConfigGenerator call = new ConfigGenerator(oc);
             call.setDataSourceName(args[1]);
             call.setTableList(ConfigGenerator.loadTablesFromFile(args[2]));
