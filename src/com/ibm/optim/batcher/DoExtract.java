@@ -53,6 +53,9 @@ public class DoExtract {
         sb.append("CREATE EXTR ");
         sb.append(oc.createId(dataSourceName, tabName, ObjectTypes.EXTRACT));
         sb.append(eol);
+        sb.append("  DESC //Extract table ").append(dataSourceName)
+                .append(".").append(tabName).append("//");
+        sb.append(eol);
         sb.append("  XF //'")
                 .append("EXTR-")
                 .append(dataSourceName)
@@ -60,6 +63,31 @@ public class DoExtract {
                 .append(tabName)
                 .append(".XF")
                 .append("'// ");
+        sb.append(eol);
+        sb.append("  LOCALAD (");
+        sb.append(eol);
+        sb.append("    SRCQUAL ").append(dataSourceName).append(tabParts[0]);
+        sb.append(" START ").append(tabParts[1]);
+        sb.append(" ADDTBLS N");
+        sb.append(" MODCRIT N");
+        sb.append(" ADCHGS Y");
+        sb.append(" USENEW N");
+        sb.append(" PNSSTATE N");
+        sb.append(eol);
+        sb.append(" TABLE (").append(tabParts[1]);
+        sb.append(" REF N");
+        sb.append(" PREDOP A");
+        sb.append(" VARDELIM :");
+        sb.append(" COLFLAG N");
+        sb.append(" DAA N");
+        sb.append(" UR N");
+        sb.append(" )");
+        sb.append(eol);
+        sb.append("  )");
+        sb.append(eol);
+        sb.append("  PNSOVERRIDE N PNSOPT N");
+        sb.append(eol);
+        sb.append("  ALWAYSPROMPT N OPTION B");
         sb.append(eol);
         sb.append(";");
         sb.append(eol);
