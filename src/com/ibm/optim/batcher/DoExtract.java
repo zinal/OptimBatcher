@@ -4,7 +4,9 @@
 package com.ibm.optim.batcher;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,14 @@ public class DoExtract {
         for (String tn : tableList) {
             addExtract(sb, tn);
         }
+        final File f = File.createTempFile("OptimBatcher", ".txt");
+        final FileOutputStream fos = new FileOutputStream(f);
+        try {
+            fos.write(sb.toString().getBytes("UTF-8"));
+        } finally {
+            fos.close();
+        }
+        importFile(f);
     }
     
     private void addExtract(StringBuilder sb, String tabName) throws Exception {
@@ -56,13 +66,7 @@ public class DoExtract {
         sb.append("  DESC //Extract table ").append(dataSourceName)
                 .append(".").append(tabName).append("//");
         sb.append(eol);
-        sb.append("  XF //'")
-                .append("EXTR-")
-                .append(dataSourceName)
-                .append(".")
-                .append(tabName)
-                .append(".XF")
-                .append("'// ");
+        sb.append("  XF //'").append(makeExtractFileName(tabName)).append("'// ");
         sb.append(eol);
         sb.append("  LOCALAD (");
         sb.append(eol);
@@ -87,11 +91,27 @@ public class DoExtract {
         sb.append(eol);
         sb.append("  PNSOVERRIDE N PNSOPT N");
         sb.append(eol);
-        sb.append("  ALWAYSPROMPT N OPTION B");
+        sb.append("  ALWAYSPROMPT N OPTION B COMPRESSFILE Y");
         sb.append(eol);
         sb.append(";");
         sb.append(eol);
         sb.append(eol);
+    }
+    
+    private String makeExtractFileName(String tabName) {
+        return "EXTR-" + dataSourceName + "." + tabName + ".XF";
+    }
+
+    private void importFile(File f) throws Exception {
+        final List<String> cmd = new ArrayList<>();
+        cmd.add(new File(oc.getOptimPath(), "PR0CMND.EXE").getAbsolutePath());
+        cmd.add("/IMPORT");
+        cmd.add("IN=" + f.getAbsolutePath());
+        final ProcessBuilder pb = new ProcessBuilder(cmd);
+        final Process proc = pb.start();
+        int code = proc.waitFor();
+        if (code!=0)
+            throw new RuntimeException("Optim configuration import process failed with code " + code);
     }
 
     public static List<String> loadTablesFromFile(String fname) throws Exception {
@@ -114,5 +134,5 @@ public class DoExtract {
             br.close();
         }
     }
-    
+
 }
