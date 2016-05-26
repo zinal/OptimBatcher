@@ -43,12 +43,15 @@ public class Main {
             showHelpAndExit();
             throw new UnsupportedOperationException(); // UNREACHED
         }
+        final OptimCalls oc = new OptimCalls(props, args);
         try {
-            action.run(new OptimCalls(props, args));
+            action.run(oc);
         } catch(Exception ex) {
             System.err.println("ERROR: failed to execute action " + action.getName());
             ex.printStackTrace(System.err);
             System.exit(1);
+        } finally {
+            oc.close();
         }
     }
     

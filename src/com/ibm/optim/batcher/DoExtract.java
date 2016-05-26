@@ -3,6 +3,11 @@
  */
 package com.ibm.optim.batcher;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,4 +43,21 @@ public class DoExtract {
         
     }
 
+    public static List<String> loadTablesFromFile(String fname) throws Exception {
+        final BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(fname), "UTF-8"));
+        try {
+            final List<String> ll = new ArrayList<>();
+            String line;
+            while ((line=br.readLine())!=null) {
+                line = line.trim().toUpperCase();
+                if (line.length() > 0 && !line.startsWith("#"))
+                    ll.add(line);
+            }
+            return ll;
+        } finally {
+            br.close();
+        }
+    }
+    
 }
