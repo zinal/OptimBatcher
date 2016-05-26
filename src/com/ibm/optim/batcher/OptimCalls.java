@@ -92,6 +92,9 @@ public class OptimCalls implements Closeable {
     public String createId(String dataSource, String baseName, ObjectTypes type) throws Exception {
         if (dataSource.length() > 8)
             dataSource = dataSource.substring(0, 8);
+        final String[] baseParts = baseName.split("[.]");
+        if (baseParts.length>1)
+            baseName = baseParts[1];
         if (baseName.length() > 12)
             baseName = baseName.substring(0, 12);
         String id = dataSource + "." + baseName;

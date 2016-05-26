@@ -92,7 +92,6 @@ public class ConfigGenerator {
         sb.append("  PNSOVERRIDE N PNSOPT N");
         sb.append(eol);
         sb.append("  ALWAYSPROMPT N OPTION B COMPRESSFILE Y");
-        sb.append(eol);
         sb.append(";");
         sb.append(eol);
         sb.append(eol);
