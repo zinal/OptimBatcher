@@ -45,14 +45,21 @@ public class ConfigGenerator {
         for (String tn : tableList) {
             addExtract(sb, tn);
         }
-        final File f = File.createTempFile("OptimBatcher", ".txt");
-        final FileOutputStream fos = new FileOutputStream(f);
+        final String tempPath = oc.getProperties().getProperty("import.dir");
+        final File fin;
+        if (tempPath==null || tempPath.trim().length()==0)
+            fin = File.createTempFile("OptimBatcher", "_in.txt");
+        else
+            fin = File.createTempFile("OptimBatcher", "_in.txt", new File(tempPath));
+        final FileOutputStream fos = new FileOutputStream(fin);
         try {
             fos.write(sb.toString().getBytes("UTF-8"));
         } finally {
             fos.close();
         }
-        importFile(f);
+        String foutPath = fin.getAbsolutePath();
+        foutPath = foutPath.substring(0, foutPath.length()-7) + "_out.txt";
+        importFile(fin, new File(foutPath));
     }
     
     private void addExtract(StringBuilder sb, String tabName) throws Exception {
@@ -70,7 +77,8 @@ public class ConfigGenerator {
         sb.append(eol);
         sb.append("  LOCALAD (");
         sb.append(eol);
-        sb.append("    SRCQUAL ").append(dataSourceName).append(tabParts[0]);
+        sb.append("    SRCQUAL ").append(dataSourceName)
+                .append(".").append(tabParts[0]);
         sb.append(" START ").append(tabParts[1]);
         sb.append(" ADDTBLS N");
         sb.append(" MODCRIT N");
@@ -91,7 +99,7 @@ public class ConfigGenerator {
         sb.append(eol);
         sb.append("  PNSOVERRIDE N PNSOPT N");
         sb.append(eol);
-        sb.append("  ALWAYSPROMPT N OPTION B COMPRESSFILE Y");
+        sb.append("  ALWAYSPROMPT N OPTION B COMPRESSFILE Y ROWLIMIT 0");
         sb.append(";");
         sb.append(eol);
         sb.append(eol);
@@ -101,9 +109,9 @@ public class ConfigGenerator {
         return "EXTR-" + dataSourceName + "." + tabName + ".XF";
     }
 
-    private void importFile(File f) throws Exception {
+    private void importFile(File fin, File fout) throws Exception {
         final List<String> cmd = new ArrayList<>();
-        final String runas = oc.getProperties().getProperty("optim.runas");
+        final String runas = oc.getProperties().getProperty("import.runas");
         if (runas!=null && runas.trim().length()>0) {
             for (String item : runas.split(" ")) {
                 final String cur = item.trim();
@@ -111,10 +119,14 @@ public class ConfigGenerator {
                     cmd.add(cur);
             }
         }
+        final String optimDir = oc.getProperties().getProperty("optim.directory");
         cmd.add(new File(oc.getOptimPath(), "PR0CMND.EXE").getAbsolutePath());
         cmd.add("/IMPORT");
-        final String path = f.getAbsolutePath();
-        cmd.add("IN=" + path);
+        cmd.add("IN=" + fin.getAbsolutePath());
+        if (optimDir!=null && optimDir.trim().length()>0)
+            cmd.add("D="+optimDir.trim());
+        cmd.add("O=" + fout.getAbsolutePath());
+        cmd.add("ContinueOnError+");
         final ProcessBuilder pb = new ProcessBuilder(cmd);
         final Process proc = pb.start();
         int code = proc.waitFor();
