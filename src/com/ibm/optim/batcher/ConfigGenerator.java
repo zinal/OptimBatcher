@@ -99,7 +99,15 @@ public class ConfigGenerator {
         sb.append(eol);
         sb.append("  PNSOVERRIDE N PNSOPT N");
         sb.append(eol);
-        sb.append("  ALWAYSPROMPT N OPTION B COMPRESSFILE Y ROWLIMIT 0");
+        sb.append("  PNSSTART ").append(dataSourceName)
+                .append(".").append(tabName);
+        sb.append(eol);
+        sb.append("  ALWAYSPROMPT N OPTION B");
+        sb.append(eol);
+        sb.append("  INCLPK Y INCLFK Y INCLIDX Y");
+        sb.append(eol);
+        sb.append("  COMPRESSFILE Y ROWLIMIT 0");
+        sb.append(eol);
         sb.append(";");
         sb.append(eol);
         sb.append(eol);
