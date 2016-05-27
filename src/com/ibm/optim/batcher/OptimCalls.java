@@ -102,8 +102,8 @@ public class OptimCalls implements Closeable {
             return id;
         if (baseName.length() > 9)
             baseName = baseName.substring(0, 9);
-        for (int i=0; i<999; ++i) {
-            id = dataSource + "." + baseName + String.format("%03d", i);
+        for (int i=0; i<99999; ++i) {
+            id = dataSource + "." + baseName + String.format("%02d", i);
             if (!idExists(id, type))
                 return id;
         }
