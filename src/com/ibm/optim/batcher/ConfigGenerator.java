@@ -72,18 +72,19 @@ public class ConfigGenerator {
         }
     }
     
-    private void addExtract(StringBuilder sb, String tabName) throws Exception {
+    private String addExtract(StringBuilder sb, String tabName) throws Exception {
+        final String serviceName = oc.createId(dataSourceName, tabName, ObjectTypes.EXTRACT);
         final String eol = System.getProperty("line.separator");
         final String[] tabParts = tabName.split("[.]");
         if (tabParts.length!=2 || tabParts[0].trim().length()==0 || tabParts[1].trim().length()==0)
             throw new IllegalArgumentException("Invalid table name: [" + tabName + "]");
         sb.append("CREATE EXTR ");
-        sb.append(oc.createId(dataSourceName, tabName, ObjectTypes.EXTRACT));
+        sb.append(serviceName);
         sb.append(eol);
         sb.append("  DESC //Extract table ").append(dataSourceName)
                 .append(".").append(tabName).append("//");
         sb.append(eol);
-        sb.append("  XF //'").append(makeExtractFileName(tabName)).append("'// ");
+        sb.append("  XF //'").append(makeExtractFileName(serviceName)).append("'// ");
         sb.append(eol);
         sb.append("  LOCALAD (");
         sb.append(eol);
@@ -120,10 +121,11 @@ public class ConfigGenerator {
         sb.append(";");
         sb.append(eol);
         sb.append(eol);
+        return serviceName;
     }
-    
-    private String makeExtractFileName(String tabName) {
-        return "EXTR-" + dataSourceName + "." + tabName + ".XF";
+
+    private String makeExtractFileName(String serviceName) {
+        return "EXTR-" + serviceName + ".XF";
     }
 
     private void importFile(File fin, File fout) throws Exception {
