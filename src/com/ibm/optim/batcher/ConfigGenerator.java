@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,15 +52,24 @@ public class ConfigGenerator {
             fin = File.createTempFile("OptimBatcher", "_in.txt");
         else
             fin = File.createTempFile("OptimBatcher", "_in.txt", new File(tempPath));
-        final FileOutputStream fos = new FileOutputStream(fin);
         try {
-            fos.write(sb.toString().getBytes("UTF-8"));
+            final FileOutputStream fos = new FileOutputStream(fin);
+            try {
+                fos.write(sb.toString().getBytes("UTF-8"));
+            } finally {
+                fos.close();
+            }
+            String foutPath = fin.getAbsolutePath();
+            foutPath = foutPath.substring(0, foutPath.length()-7) + "_out.txt";
+            final File fout = new File(foutPath);
+            try {
+                importFile(fin, fout);
+            } finally {
+                fout.delete();
+            }
         } finally {
-            fos.close();
+            fin.delete();
         }
-        String foutPath = fin.getAbsolutePath();
-        foutPath = foutPath.substring(0, foutPath.length()-7) + "_out.txt";
-        importFile(fin, new File(foutPath));
     }
     
     private void addExtract(StringBuilder sb, String tabName) throws Exception {
@@ -107,7 +117,6 @@ public class ConfigGenerator {
         sb.append("  INCLPK Y INCLFK Y INCLIDX Y");
         sb.append(eol);
         sb.append("  COMPRESSFILE Y ROWLIMIT 0");
-        sb.append(eol);
         sb.append(";");
         sb.append(eol);
         sb.append(eol);
@@ -118,6 +127,9 @@ public class ConfigGenerator {
     }
 
     private void importFile(File fin, File fout) throws Exception {
+        System.out.println();
+        dumpFile(fin, "Optim input commands", "INP> ");
+
         final List<String> cmd = new ArrayList<>();
         final String runas = oc.getProperties().getProperty("import.runas");
         if (runas!=null && runas.trim().length()>0) {
@@ -135,11 +147,43 @@ public class ConfigGenerator {
             cmd.add("D="+optimDir.trim());
         cmd.add("O=" + fout.getAbsolutePath());
         cmd.add("ContinueOnError+");
+        
+        System.out.println();
+        System.out.println("********* BEGIN COMMAND DUMP **********");
+        for (String item : cmd) {
+            System.out.println("\t" + item);
+        }
+        System.out.println("********** END COMMAND DUMP ***********");
+
         final ProcessBuilder pb = new ProcessBuilder(cmd);
         final Process proc = pb.start();
         int code = proc.waitFor();
-        if (code!=0)
+
+        System.out.println();
+        dumpFile(fout, "Optim output logfile", "OUT> ");
+        System.out.println();
+
+        if (code!=0) {
             throw new RuntimeException("Optim configuration import process failed with code " + code);
+        }
+    }
+    
+    private void dumpFile(File f, String what, String prefix) throws Exception {
+        System.out.println("*********** BEGIN FILE DUMP ***********");
+        System.out.println("** File name: " + f.getAbsolutePath());
+        System.out.println("** " + what);
+        System.out.println("** ");
+        final BufferedReader br = new BufferedReader(new FileReader(f));
+        try {
+            String line;
+            while ((line=br.readLine())!=null) {
+                System.out.println(prefix + line);
+            }
+        } finally {
+            br.close();
+        }
+        System.out.println("** ");
+        System.out.println("************ END FILE DUMP ************");
     }
 
     public static List<String> loadTablesFromFile(String fname) throws Exception {
