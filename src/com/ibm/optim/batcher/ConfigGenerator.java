@@ -206,9 +206,9 @@ public class ConfigGenerator {
             sb.append("CREATE CONV ");
             sb.append(convertServiceName);
             sb.append(eol);
-            sb.append("  DESC //Transform table ").append(oc.getJobSourceAlias())
+            sb.append("  DESC //'Transform table ").append(oc.getJobSourceAlias())
                     .append(".").append(tabName).append(" after data extraction")
-                    .append("//");
+                    .append("'//");
             sb.append(eol);
             sb.append("  SRCXF //'").append(makeExtractFileName()).append("'// ");
             sb.append(eol);
@@ -220,8 +220,8 @@ public class ConfigGenerator {
             sb.append(eol);
             sb.append("  LOCALTM (");
             sb.append(eol);
-            sb.append("    SRCQUAL ").append(oc.getJobSourceAlias()).append(tabParts[0])
-                    .append(" DESTQUAL ").append(oc.getJobTargetAlias())
+            sb.append("    SRCQUAL ").append(oc.getJobSourceAlias()).append(".").append(tabParts[0])
+                    .append(" DESTQUAL ").append(oc.getJobTargetAlias()).append(".")
                     .append(oc.getJobTargetSchema()==null ? tabParts[0] : oc.getJobTargetSchema())
                     .append(" VALRULES M UNUSEDOBJ N");
             sb.append(eol);
