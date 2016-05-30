@@ -20,14 +20,15 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        if (args.length != 3) {
+        if (args.length != 2) {
             showHelpAndExit();
         }
-        final Properties props = new Properties();
+        final Properties globalProps = new Properties();
+        final Properties jobProps = new Properties();
         try {
             final FileInputStream fis = new FileInputStream(args[0]);
             try {
-                props.load(fis);
+                globalProps.load(fis);
             } finally {
                 fis.close();
             }
@@ -36,13 +37,22 @@ public class Main {
             ex.printStackTrace(System.err);
             System.exit(1);
         }
-        final OptimCalls oc = new OptimCalls(props);
+        try {
+            final FileInputStream fis = new FileInputStream(args[1]);
+            try {
+                jobProps.load(fis);
+            } finally {
+                fis.close();
+            }
+        } catch(Exception ex) {
+            System.err.println("ERROR: failed to load property file [" + args[1] + "]");
+            ex.printStackTrace(System.err);
+            System.exit(1);
+        }
+        final OptimCalls oc = new OptimCalls(globalProps, jobProps);
         try {
             oc.open();
-            final ConfigGenerator call = new ConfigGenerator(oc);
-            call.setDataSourceName(args[1]);
-            call.setTableList(loadTablesFromFile(args[2]));
-            call.run();
+            new ConfigGenerator(oc).run();
         } catch(Exception ex) {
             System.err.println("ERROR: utility execution failed");
             ex.printStackTrace(System.err);
@@ -51,10 +61,9 @@ public class Main {
             oc.close();
         }
     }
-    
+
     private static void showHelpAndExit() {
-        System.err.println("USAGE: java -jar OptimBatcher.jar "
-                + "OptimBatcher.properties data-source tables.txt");
+        System.err.println("USAGE: java -jar OptimBatcher.jar Global.properties Job.properties");
         System.exit(1);
     }
 

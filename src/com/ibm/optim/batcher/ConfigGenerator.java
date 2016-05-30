@@ -18,35 +18,22 @@ public class ConfigGenerator {
 
     private final OptimCalls oc;
 
-    private String dataSourceName;
-    private List<String> tableList;
-
     public ConfigGenerator(OptimCalls oc) {
         this.oc = oc;
     }
 
-    public String getDataSourceName() {
-        return dataSourceName;
-    }
-    public void setDataSourceName(String dataSourceName) {
-        this.dataSourceName = dataSourceName;
-    }
-
     public List<String> getTableList() {
-        return tableList;
-    }
-    public void setTableList(List<String> tableList) {
-        this.tableList = tableList;
+        return oc.getJobTableList();
     }
 
     public void run() throws Exception {
         // Create a buffer with a set of Optim import commands
         final StringBuilder sb = new StringBuilder();
-        for (String tn : tableList) {
+        for (String tn : getTableList()) {
             new Maker(tn).run(sb);
         }
         // Build unique temp filenames for input commands and output execution report
-        final String tempPath = oc.getProperties().getProperty("import.dir");
+        final String tempPath = oc.getImportPath();
         final File fin;
         if (tempPath==null || tempPath.trim().length()==0)
             fin = File.createTempFile("OptimBatcher", "_in.txt");
@@ -78,20 +65,20 @@ public class ConfigGenerator {
         dumpFile(fin, "Optim input commands", "INP> ");
 
         final List<String> cmd = new ArrayList<>();
-        final String runas = oc.getProperties().getProperty("import.runas");
-        if (runas!=null && runas.trim().length()>0) {
+        final String runas = oc.getImportRunAs();
+        if (runas!=null) {
             for (String item : runas.split(" ")) {
                 final String cur = item.trim();
                 if (cur.length() > 0)
                     cmd.add(cur);
             }
         }
-        final String optimDir = oc.getProperties().getProperty("optim.directory");
+        final String optimDir = oc.getOptimDirName();
         cmd.add(new File(oc.getOptimPath(), "PR0CMND.EXE").getAbsolutePath());
         cmd.add("/IMPORT");
         cmd.add("IN=" + fin.getAbsolutePath());
-        if (optimDir!=null && optimDir.trim().length()>0)
-            cmd.add("D="+optimDir.trim());
+        if (optimDir!=null)
+            cmd.add("D="+optimDir);
         cmd.add("O=" + fout.getAbsolutePath());
         cmd.add("ContinueOnError+");
         
@@ -146,12 +133,21 @@ public class ConfigGenerator {
         
         Maker(String tabName) throws Exception {
             this.eol = System.getProperty("line.separator");
-            this.tabName = tabName;
-            this.tabParts = tabName.split("[.]");
-            if (tabParts.length!=2 || tabParts[0].trim().length()==0 || tabParts[1].trim().length()==0)
+            this.tabParts = new String[2];
+            final String[] tmpParts = tabName.split("[.]");
+            if (tmpParts.length==1) {
+                this.tabParts[0] = oc.getJobSourceSchema();
+                this.tabParts[1] = tabName;
+                this.tabName = oc.getJobSourceSchema() + "." + tabName;
+            } else if (tmpParts.length==2 && tmpParts[0].length()>0 && tmpParts[1].length()>0) {
+                this.tabParts[0] = tmpParts[0];
+                this.tabParts[1] = tmpParts[1];
+                this.tabName = tabName;
+            } else {
                 throw new IllegalArgumentException("Invalid table name: [" + tabName + "]");
-            this.extractServiceName = oc.createId(dataSourceName, tabName, ObjectTypes.EXTRACT);
-            this.convertServiceName = oc.createId(dataSourceName, tabName, ObjectTypes.CONVERT);
+            }
+            this.extractServiceName = oc.createId(tabName, ObjectTypes.EXTRACT);
+            this.convertServiceName = oc.createId(tabName, ObjectTypes.CONVERT);
         }
         
         void run(StringBuilder sb) throws Exception {
@@ -163,14 +159,14 @@ public class ConfigGenerator {
             sb.append("CREATE EXTR ");
             sb.append(extractServiceName);
             sb.append(eol);
-            sb.append("  DESC //Extract table ").append(dataSourceName)
+            sb.append("  DESC //Extract table ").append(oc.getJobSourceAlias())
                     .append(".").append(tabName).append("//");
             sb.append(eol);
             sb.append("  XF //'").append(makeExtractFileName()).append("'// ");
             sb.append(eol);
             sb.append("  LOCALAD (");
             sb.append(eol);
-            sb.append("    SRCQUAL ").append(dataSourceName)
+            sb.append("    SRCQUAL ").append(oc.getJobSourceAlias())
                     .append(".").append(tabParts[0]);
             sb.append(" START ").append(tabParts[1]);
             sb.append(" ADDTBLS N");
@@ -192,7 +188,7 @@ public class ConfigGenerator {
             sb.append(eol);
             sb.append("  PNSOVERRIDE N PNSOPT N");
             sb.append(eol);
-            sb.append("  PNSSTART ").append(dataSourceName)
+            sb.append("  PNSSTART ").append(oc.getJobSourceAlias())
                     .append(".").append(tabName);
             sb.append(eol);
             sb.append("  ALWAYSPROMPT N OPTION B");
@@ -210,7 +206,7 @@ public class ConfigGenerator {
             sb.append("CREATE CONV ");
             sb.append(convertServiceName);
             sb.append(eol);
-            sb.append("  DESC //Transform table ").append(dataSourceName)
+            sb.append("  DESC //Transform table ").append(oc.getJobSourceAlias())
                     .append(".").append(tabName).append(" after data extraction")
                     .append("//");
             sb.append(eol);
@@ -224,8 +220,9 @@ public class ConfigGenerator {
             sb.append(eol);
             sb.append("  LOCALTM (");
             sb.append(eol);
-            sb.append("    SRCQUAL ").append(dataSourceName).append(tabParts[0])
-                    .append(" DESTQUAL ").append(dataSourceName).append(tabParts[0])
+            sb.append("    SRCQUAL ").append(oc.getJobSourceAlias()).append(tabParts[0])
+                    .append(" DESTQUAL ").append(oc.getJobTargetAlias())
+                    .append(oc.getJobTargetSchema()==null ? tabParts[0] : oc.getJobTargetSchema())
                     .append(" VALRULES M UNUSEDOBJ N");
             sb.append(eol);
             sb.append("    (").append(tabParts[1]).append(" = ").append(tabParts[1]).append(")");
