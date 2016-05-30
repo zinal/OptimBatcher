@@ -218,11 +218,18 @@ public class ConfigGenerator {
             sb.append(eol);
             sb.append("  DESTXF //'").append(makeExtractFileName()).append("'// ");
             sb.append(eol);
+            sb.append("  CF //'").append(makeConvControlFileName()).append("'// ");
+            sb.append(eol);
             sb.append("  FORCEEDITTM N DELCNTLFILE N ");
             sb.append(eol);
             sb.append("  LOCALTM (");
             sb.append(eol);
-
+            sb.append("    SRCQUAL ").append(dataSourceName).append(tabParts[0])
+                    .append(" DESTQUAL ").append(dataSourceName).append(tabParts[0])
+                    .append(" VALRULES M UNUSEDOBJ N");
+            sb.append(eol);
+            sb.append("    (").append(tabParts[1]).append(" = ").append(tabParts[1]).append(")");
+            sb.append(eol);
             sb.append("  )");
             sb.append(eol);
             sb.append("  SHOWCURRENCY N SHOWAGE N");
@@ -236,6 +243,11 @@ public class ConfigGenerator {
         private String makeExtractFileName() {
             return "EXTR-" + extractServiceName + ".XF";
         }
-    }
+        
+        private String makeConvControlFileName() {
+            return "Control-" + convertServiceName + ".CF";
+        }
+
+    } // class Maker
 
 }
