@@ -32,6 +32,7 @@ public class OptimConfig implements Closeable {
     private final String optimDirName;
     private final String importPath;
     private final String importRunAs;
+    private final String optimDataFiles;
     
     // Used job properties
     private final String jobGroup;
@@ -53,6 +54,7 @@ public class OptimConfig implements Closeable {
         this.optimDirName = getProp(globalProps, "optim.dirname");
         this.importPath = getProp(globalProps, "import.path");
         this.importRunAs = getProp(globalProps, "import.runas");
+        this.optimDataFiles = getProp(globalProps, "optim.datafiles");
         validateGlobalProps();
         
         this.jobGroup = getProp(jobProps, "optim.job.group");
@@ -87,11 +89,11 @@ public class OptimConfig implements Closeable {
     }
 
     private void loadJobTableList() throws Exception {
-        final String mode = jobProps.getProperty("optim.job.list.mode", "").trim();
+        final String mode = jobProps.getProperty("optim.job.listmode", "").trim();
         if ("FILE".equalsIgnoreCase(mode)) {
-            final String fname = jobProps.getProperty("optim.job.list.file", "").trim();
+            final String fname = jobProps.getProperty("optim.job.listfile", "").trim();
             if (fname.length()==0)
-                throw new IllegalArgumentException("Missing required property [optim.job.list.file]");
+                throw new IllegalArgumentException("Missing required property [optim.job.listfile]");
             jobTableList = loadTablesFromFile(fname);
         } else {
             jobTableList = loadTablesFromProps(jobProps, "optim.job.list.");
@@ -128,6 +130,9 @@ public class OptimConfig implements Closeable {
     }
     public final String getImportRunAs() {
         return importRunAs;
+    }
+    public final String getOptimDataFiles() {
+        return optimDataFiles;
     }
 
     public final String getJobGroup() {

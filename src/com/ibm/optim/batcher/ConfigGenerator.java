@@ -262,7 +262,8 @@ public class ConfigGenerator {
             sb.append(eol);
             sb.append("  REPORT_OPTION (");
             sb.append(eol);
-            sb.append("RPTERROR T MAXRUNERR 100 MAXTBLERR 10 RPTSUMMARY F RPTINVALID F RPTSKIPPED F");
+            sb.append("    RPTERROR T MAXRUNERR 100 MAXTBLERR 10")
+                    .append(" RPTSUMMARY F RPTINVALID F RPTSKIPPED F");
             sb.append(eol);
             sb.append("  )");
             sb.append(eol);
@@ -284,15 +285,21 @@ public class ConfigGenerator {
         }
 
         private String makeExtractFileName() {
-            return "EXTR-" + extractServiceName + ".XF";
+            return makePath("EXTR-" + extractServiceName + ".XF");
         }
         
         private String makeConvControlFileName() {
-            return "CTL-CONV-" + convertServiceName + ".CF";
+            return makePath("CTL-CONV-" + convertServiceName + ".CF");
         }
 
         private String makeLoadControlFileName() {
-            return "CTL-LOAD-" + loadServiceName + ".CF";
+            return makePath("CTL-LOAD-" + loadServiceName + ".CF");
+        }
+        
+        private String makePath(String filename) {
+            if (oc.getOptimDataFiles()==null)
+                return filename;
+            return new File(oc.getOptimDataFiles(), filename).getAbsolutePath();
         }
 
     } // class Maker
