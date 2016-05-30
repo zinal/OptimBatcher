@@ -206,10 +206,6 @@ public class ConfigGenerator {
             sb.append("CREATE CONV ");
             sb.append(convertServiceName);
             sb.append(eol);
-            sb.append("  DESC //'Transform table ").append(oc.getJobSourceAlias())
-                    .append(".").append(tabName).append(" after data extraction")
-                    .append("'//");
-            sb.append(eol);
             sb.append("  SRCXF //'").append(makeExtractFileName()).append("'// ");
             sb.append(eol);
             sb.append("  DESTXF //'").append(makeExtractFileName()).append("'// ");
