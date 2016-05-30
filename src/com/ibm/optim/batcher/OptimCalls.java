@@ -87,7 +87,7 @@ public class OptimCalls implements Closeable {
     private void loadJobTableList() throws Exception {
         final String mode = jobProps.getProperty("optim.job.list.mode", "").trim();
         if ("FILE".equalsIgnoreCase(mode)) {
-            final String fname = globalProps.getProperty("optim.job.list.file", "").trim();
+            final String fname = jobProps.getProperty("optim.job.list.file", "").trim();
             if (fname.length()==0)
                 throw new IllegalArgumentException("Missing required property [optim.job.list.file]");
             jobTableList = loadTablesFromFile(fname);
