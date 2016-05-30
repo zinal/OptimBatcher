@@ -45,16 +45,18 @@ public class Main {
             ex.printStackTrace(System.err);
             System.exit(1);
         }
-        final OptimCalls oc = new OptimCalls(globalProps, jobProps);
         try {
-            oc.open();
-            new ConfigGenerator(oc).run();
+            final OptimCalls oc = new OptimCalls(globalProps, jobProps);
+            try {
+                oc.open();
+                new ConfigGenerator(oc).run();
+            } finally {
+                oc.close();
+            }
         } catch(Exception ex) {
             System.err.println("ERROR: utility execution failed");
             ex.printStackTrace(System.err);
             System.exit(1);
-        } finally {
-            oc.close();
         }
     }
 
