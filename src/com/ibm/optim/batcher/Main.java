@@ -3,11 +3,7 @@
  */
 package com.ibm.optim.batcher;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -67,24 +63,4 @@ public class Main {
         System.exit(1);
     }
 
-    private static List<String> loadTablesFromFile(String fname) throws Exception {
-        final BufferedReader br = new BufferedReader(
-                new InputStreamReader(new FileInputStream(fname), "UTF-8"));
-        try {
-            final List<String> ll = new ArrayList<>();
-            String line;
-            while ((line=br.readLine())!=null) {
-                line = line.trim().toUpperCase();
-                if (line.length() > 0 && !line.startsWith("#")) {
-                    String[] tmp = line.split("[.]");
-                    if (tmp.length!=2 || tmp[0].trim().length()==0 || tmp[1].trim().length()==0)
-                        throw new IllegalArgumentException("Invalid table name: [" + line + "]");
-                    ll.add(line);
-                }
-            }
-            return ll;
-        } finally {
-            br.close();
-        }
-    }
 }
