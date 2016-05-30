@@ -46,7 +46,7 @@ public class Main {
             System.exit(1);
         }
         try {
-            final OptimCalls oc = new OptimCalls(globalProps, jobProps);
+            final OptimConfig oc = new OptimConfig(globalProps, jobProps);
             try {
                 oc.open();
                 new ConfigGenerator(oc).run();

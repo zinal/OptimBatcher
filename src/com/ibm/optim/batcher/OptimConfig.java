@@ -22,7 +22,7 @@ import java.util.Properties;
  *
  * @author zinal_m
  */
-public class OptimCalls implements Closeable {
+public class OptimConfig implements Closeable {
 
     private final Properties globalProps;
     private final Properties jobProps;
@@ -35,6 +35,7 @@ public class OptimCalls implements Closeable {
     
     // Used job properties
     private final String jobGroup;
+    private final String jobDbType;
     private final String jobSourceAlias;
     private final String jobSourceSchema;
     private final String jobTargetAlias;
@@ -44,7 +45,7 @@ public class OptimCalls implements Closeable {
     // Optim directory database connection
     private Connection optimDirCnc;
 
-    public OptimCalls(Properties globalProps, Properties jobProps) throws Exception {
+    public OptimConfig(Properties globalProps, Properties jobProps) throws Exception {
         this.globalProps = globalProps;
         this.jobProps = jobProps;
         
@@ -55,6 +56,7 @@ public class OptimCalls implements Closeable {
         validateGlobalProps();
         
         this.jobGroup = getProp(jobProps, "optim.job.group");
+        this.jobDbType = getProp(jobProps, "optim.job.db");
         this.jobSourceAlias = getProp(jobProps, "optim.job.source.alias");
         this.jobSourceSchema = getProp(jobProps, "optim.job.source.schema");
         this.jobTargetAlias = getProp(jobProps, "optim.job.target.alias");
@@ -147,6 +149,10 @@ public class OptimCalls implements Closeable {
     }
     public final List<String> getJobTableList() {
         return jobTableList;
+    }
+
+    public final boolean isDbDb2() {
+        return jobDbType!=null && "DB2".equalsIgnoreCase(jobDbType);
     }
 
     public void open() throws Exception {

@@ -16,9 +16,9 @@ import java.util.List;
  */
 public class ConfigGenerator {
 
-    private final OptimCalls oc;
+    private final OptimConfig oc;
 
-    public ConfigGenerator(OptimCalls oc) {
+    public ConfigGenerator(OptimConfig oc) {
         this.oc = oc;
     }
 
@@ -130,6 +130,7 @@ public class ConfigGenerator {
         final String[] tabParts;
         final String extractServiceName;
         final String convertServiceName;
+        final String loadServiceName;
         
         Maker(String tabName) throws Exception {
             this.eol = System.getProperty("line.separator");
@@ -148,19 +149,18 @@ public class ConfigGenerator {
             }
             this.extractServiceName = oc.createId(tabName, ObjectTypes.EXTRACT);
             this.convertServiceName = oc.createId(tabName, ObjectTypes.CONVERT);
+            this.loadServiceName = oc.createId(tabName, ObjectTypes.CONVERT);
         }
         
         void run(StringBuilder sb) throws Exception {
             addExtract(sb);
             addConvert(sb);
+            addLoad(sb);
         }
 
         private void addExtract(StringBuilder sb) throws Exception {
             sb.append("CREATE EXTR ");
             sb.append(extractServiceName);
-            sb.append(eol);
-            sb.append("  DESC //Extract table ").append(oc.getJobSourceAlias())
-                    .append(".").append(tabName).append("//");
             sb.append(eol);
             sb.append("  XF //'").append(makeExtractFileName()).append("'// ");
             sb.append(eol);
@@ -216,10 +216,12 @@ public class ConfigGenerator {
             sb.append(eol);
             sb.append("  LOCALTM (");
             sb.append(eol);
-            sb.append("    SRCQUAL ").append(oc.getJobSourceAlias()).append(".").append(tabParts[0])
-                    .append(" DESTQUAL ").append(oc.getJobTargetAlias()).append(".")
-                    .append(oc.getJobTargetSchema()==null ? tabParts[0] : oc.getJobTargetSchema())
-                    .append(" VALRULES M UNUSEDOBJ N");
+            sb
+                .append("    SRCQUAL ").append(oc.getJobSourceAlias())
+                .append(".").append(tabParts[0])
+                .append(" DESTQUAL ").append(oc.getJobSourceAlias())
+                .append(".").append(tabParts[0])
+                .append(" VALRULES M UNUSEDOBJ N");
             sb.append(eol);
             sb.append("    (").append(tabParts[1]).append(" = ").append(tabParts[1]).append(")");
             sb.append(eol);
@@ -233,12 +235,64 @@ public class ConfigGenerator {
             sb.append(eol);
         }
 
+        private void addLoad(StringBuilder sb) throws Exception {
+            sb.append("CREATE LOAD ");
+            sb.append(loadServiceName);
+            sb.append(eol);
+            sb.append("  XF //'").append(makeExtractFileName()).append("'// ");
+            sb.append(eol);
+            sb.append("  CF //'").append(makeLoadControlFileName()).append("'// ");
+            sb.append(eol);
+            sb.append("  LOCALTM (");
+            sb.append(eol);
+            sb.append("    SRCQUAL ").append(oc.getJobSourceAlias()).append(".").append(tabParts[0])
+                    .append(" DESTQUAL ").append(oc.getJobTargetAlias()).append(".")
+                    .append(oc.getJobTargetSchema()==null ? tabParts[0] : oc.getJobTargetSchema())
+                    .append(" VALRULES M UNUSEDOBJ N");
+            sb.append(eol);
+            sb.append("    (").append(tabParts[1]).append(" = ").append(tabParts[1]).append(")");
+            sb.append(eol);
+            sb.append("  )");
+            sb.append(eol);
+            sb.append("  FORCEEDITTM N STOPONERROR Y STOPONFIRSTCONVERTERROR Y MODE S");
+            sb.append(eol);
+            sb.append("  ALWAYSCALLCREATE Y ALWAYSESTIMATERESOURCES Y DELCNTLFILE N");
+            sb.append(eol);
+            sb.append("  SHOWCURRENCY Y SHOWAGE Y PROCESS_FILEATTACH F");
+            sb.append(eol);
+            sb.append("  REPORT_OPTION (");
+            sb.append(eol);
+            sb.append("RPTERROR T MAXRUNERR 100 MAXTBLERR 10 RPTSUMMARY F RPTINVALID F RPTSKIPPED F");
+            sb.append(eol);
+            sb.append("  )");
+            sb.append(eol);
+            if (oc.isDbDb2()) {
+                sb.append("DB2CS (").append(oc.getJobTargetAlias())
+                        .append(" TYPE I LOAD Y DELOK Y DELFAIL N  SOURCEEMPTY N USEPIPE Y");
+                sb.append(eol);
+                sb.append("  INLINELOBS N  SCANLOBS N  MLOADIMPDELETETASK N IDENTITYOV N");
+                sb.append(eol);
+                sb.append("  REMOTELOAD Y NONRECVBLE N EXCPFAIL N EXCPCNST N");
+                sb.append(eol);
+                sb.append("  FILETYPE E  DELIMITER \"X'01'\" COPY N COMMITFREQ 1000");
+                sb.append(eol);
+                sb.append("  )");
+                sb.append(eol);
+            }
+            sb.append("  ;");
+            sb.append(eol);
+        }
+
         private String makeExtractFileName() {
             return "EXTR-" + extractServiceName + ".XF";
         }
         
         private String makeConvControlFileName() {
-            return "Control-" + convertServiceName + ".CF";
+            return "CTL-CONV-" + convertServiceName + ".CF";
+        }
+
+        private String makeLoadControlFileName() {
+            return "CTL-LOAD-" + loadServiceName + ".CF";
         }
 
     } // class Maker

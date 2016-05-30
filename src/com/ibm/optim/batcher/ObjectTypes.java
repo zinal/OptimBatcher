@@ -11,6 +11,7 @@ public enum ObjectTypes {
     
     EXTRACT("E"),
     CONVERT("N"),
+    LOAD("L"),
     ;
  
     final String code;
