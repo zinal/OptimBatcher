@@ -9,7 +9,9 @@ package com.ibm.optim.batcher;
  */
 public enum ObjectTypes {
     
-    EXTRACT("E");
+    EXTRACT("E"),
+    CONVERT("N"),
+    ;
  
     final String code;
     
