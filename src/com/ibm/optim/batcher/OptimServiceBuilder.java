@@ -1,5 +1,5 @@
 /*
- * IBM proprietary
+ * Sample code for IBM InfoSphere Optim software
  */
 package com.ibm.optim.batcher;
 
@@ -11,14 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * This class generates configurations of Optim services for import,
+ * and performs the actual import using the PR0CMND Optim tool.
  * @author zinal_m
  */
-public class ConfigGenerator {
+public class OptimServiceBuilder {
 
     private final OptimConfig oc;
 
-    public ConfigGenerator(OptimConfig oc) {
+    public OptimServiceBuilder(OptimConfig oc) {
         this.oc = oc;
     }
 

@@ -1,7 +1,7 @@
 <#if licenseFirst??>
 ${licenseFirst}
 </#if>
-${licensePrefix}IBM proprietary
+${licensePrefix}Sample code for IBM InfoSphere Optim software
 <#if licenseLast??>
 ${licenseLast}
 </#if>

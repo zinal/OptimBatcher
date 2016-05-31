@@ -1,5 +1,5 @@
 /*
- * IBM proprietary
+ * Sample code for IBM InfoSphere Optim software
  */
 package com.ibm.optim.batcher;
 
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- *
+ * Set of configuration options, plus the connection to the Optim directory database.
  * @author zinal_m
  */
 public class OptimConfig implements Closeable {

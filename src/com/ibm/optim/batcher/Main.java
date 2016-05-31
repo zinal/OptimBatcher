@@ -1,5 +1,5 @@
 /*
- * IBM proprietary
+ * Sample code for IBM InfoSphere Optim software
  */
 package com.ibm.optim.batcher;
 
@@ -7,7 +7,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 /**
- *
+ * Entry point of the OptimBatcher utility
  * @author zinal_m
  */
 public class Main {
@@ -49,7 +49,7 @@ public class Main {
             final OptimConfig oc = new OptimConfig(globalProps, jobProps);
             try {
                 oc.open();
-                new ConfigGenerator(oc).run();
+                new OptimServiceBuilder(oc).run();
             } finally {
                 oc.close();
             }
